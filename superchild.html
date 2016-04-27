@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Superchild</title>
+  <title>superchild.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -13,8 +13,47 @@
 
       <div class="header">
         
-          
-          <h1 id="superchild">Superchild</h1>
+          <h1>superchild.js</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="json-sieve.html">
+                    json-sieve.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="superchild.html">
+                    superchild.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="unlogger.html">
+                    unlogger.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p><a href="https://circleci.com/gh/mayanklahiri/node-superchild"><img src="https://circleci.com/gh/mayanklahiri/node-superchild.svg?style=svg" alt="Circle CI"></a>
+<a href="https://github.com/mayanklahiri/node-superchild/issues"><img src="https://img.shields.io/github/issues/mayanklahiri/node-superchild.svg" alt="GitHub issues"></a>
+<a href="https://raw.githubusercontent.com/mayanklahiri/node-superchild/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license"></a>
+<a href="https://twitter.com/intent/tweet?text=Wow:&amp;url=%5Bobject%20Object%5D"><img src="https://img.shields.io/twitter/url/https/github.com/mayanklahiri/node-superchild.svg?style=social" alt="Twitter"></a></p>
+<h1 id="superchild">Superchild</h1>
 <p><strong>Superchild</strong> is a POSIX-only (e.g., Linux, Mac OS X) wrapper around
 node.js’s built-in <code>child_process</code> module, which requires a lot of
 care and attention to use correctly.</p>
@@ -160,8 +199,8 @@ using <code>child.on()</code> and <code>child.once()</code> functions.</p>
 <li>POSIX-compliant platform, such as Linux or Mac OS.</li>
 </ul>
 
-          
-            <div class='highlight'><pre><span class="hljs-comment">/** @license The MIT License, Copyright (c) 2016 Mayank Lahiri &lt;mayank@iceroad.io&gt; */</span>
+        
+          <div class='highlight'><pre><span class="hljs-comment">/** @license The MIT License, Copyright (c) 2016 Mayank Lahiri &lt;mayank@iceroad.io&gt; */</span>
 <span class="hljs-keyword">var</span> events = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
   , fmt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>).format
   , fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
@@ -177,40 +216,7 @@ using <code>child.on()</code> and <code>child.once()</code> functions.</p>
   <span class="hljs-keyword">var</span> opt = {}, setDefault = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">key, defaultVal</span>) </span>{
     opt[key] = (key <span class="hljs-keyword">in</span> options) ? options[key] : defaultVal;
   };</pre></div>
-          
         
-
-        
-          <div class="toc">
-            <h3>Table of Contents</h3>
-            <ol>
-              
-                
-                <li>
-                  <a class="source" href="json-sieve.html">
-                    json-sieve.js
-                  </a>
-                </li>
-              
-                
-                <li>
-                  <a class="source" href="superchild.html">
-                    superchild.js
-                  </a>
-                </li>
-              
-                
-                <li>
-                  <a class="source" href="unlogger.html">
-                    unlogger.js
-                  </a>
-                </li>
-              
-            </ol>
-          </div>
-        
-      </div>
-
       
         
         <h4 id="default-options">Default options</h4>
