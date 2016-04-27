@@ -128,6 +128,6 @@ using `child.on()` and `child.once()` functions.
   * POSIX-compliant platform, such as Linux or Mac OS.
 
 
-See current test coverage report at [coverage/lib/index.html](coverage/lib/index.html),
+See current test coverage report at [coverage/lib/index.html](http://mayanklahiri.github.io/node-superchild/coverage/lib/index.html),
 generated using [Istanbul](https://github.com/gotwarlost/istanbul).
 
