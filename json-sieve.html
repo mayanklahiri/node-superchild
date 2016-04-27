@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>json-sieve.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>json-sieve.js</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="json-sieve.html">
+                    json-sieve.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="superchild.html">
+                    superchild.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="unlogger.html">
+                    unlogger.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <h2 id="jsonsieve">JSONSieve</h2>
+<p>Picks out line-delimited JSON arrays and objects in a data stream, and
+parses the rest into lines.</p>
+<p>Class <code>JSONSieve</code> is an <code>EventEmitter</code>.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> events = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
+  , util = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>)
+  ;
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">JSONSieve</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">this</span>.lineBuffer_ = <span class="hljs-string">''</span>;
+}
+
+
+JSONSieve.prototype.observe = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">dataStr</span>) </span>{
+  <span class="hljs-keyword">this</span>.lineBuffer_ += dataStr;
+  <span class="hljs-keyword">this</span>.parseLineBuffer_();
+};
+
+
+JSONSieve.prototype.parseLineBuffer_ = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> lines = [];
+  <span class="hljs-keyword">var</span> dataStr = <span class="hljs-keyword">this</span>.lineBuffer_;
+  <span class="hljs-keyword">var</span> idx = dataStr.indexOf(<span class="hljs-string">'\n'</span>);
+  <span class="hljs-keyword">while</span>(idx &gt;= <span class="hljs-number">0</span>) {
+    lines.push(dataStr.substr(<span class="hljs-number">0</span>, idx));  <span class="hljs-comment">// Excludes terminating new line.</span>
+    dataStr = dataStr.substr(idx + <span class="hljs-number">1</span>);   <span class="hljs-comment">// Skip newline.</span>
+    idx = dataStr.indexOf(<span class="hljs-string">'\n'</span>);
+  }
+  <span class="hljs-keyword">this</span>.lineBuffer_ = dataStr;
+  lines.forEach(<span class="hljs-keyword">this</span>.processLine_, <span class="hljs-keyword">this</span>);
+};
+
+
+JSONSieve.prototype.processLine_ = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">line</span>) </span>{</pre></div>
+        
+      
+        
+        <p>Allow some fuzz in the form of leading and trailing space.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> trimmedLine = (line || <span class="hljs-string">''</span>).replace(<span class="hljs-regexp">/^\s*|\s*$/g</span>, <span class="hljs-string">''</span>);</pre></div>
+        
+      
+        
+        <p>Check for necessary conditions for line-delimited JSON objects and arrays,
+even empty ones.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> len = trimmedLine.length;
+  <span class="hljs-keyword">if</span> (len &gt;= <span class="hljs-number">2</span>) {</pre></div>
+        
+      
+        
+        <p>Test for trimmedLine-delimited JSON objects.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (trimmedLine[<span class="hljs-number">0</span>] === <span class="hljs-string">'{'</span> &amp;&amp; trimmedLine[len - <span class="hljs-number">1</span>] === <span class="hljs-string">'}'</span>) {</pre></div>
+        
+      
+        
+        <p>Possible JSON object.</p>
+
+        
+          <div class='highlight'><pre>      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">var</span> jsonObj = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_object'</span>, jsonObj);
+      } <span class="hljs-keyword">catch</span>(e) {</pre></div>
+        
+      
+        
+        <p>Nope, not a JSON object.</p>
+
+        
+          <div class='highlight'><pre>      }
+    }</pre></div>
+        
+      
+        
+        <p>Test for trimmedLine-delimited JSON arrays.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (trimmedLine[<span class="hljs-number">0</span>] === <span class="hljs-string">'['</span> &amp;&amp; trimmedLine[len - <span class="hljs-number">1</span>] === <span class="hljs-string">']'</span>) {</pre></div>
+        
+      
+        
+        <p>Possible JSON array.</p>
+
+        
+          <div class='highlight'><pre>      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">var</span> jsonArr = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_array'</span>, jsonArr);
+      } <span class="hljs-keyword">catch</span>(e) {</pre></div>
+        
+      
+        
+        <p>Nope, not a JSON array.</p>
+
+        
+          <div class='highlight'><pre>      }
+    }
+  }</pre></div>
+        
+      
+        
+        <p>Emit as a raw line.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'stdout_line'</span>, line);
+};</pre></div>
+        
+      
+        
+        <p>Finish up any remaining data, usually the last line of output.</p>
+
+        
+          <div class='highlight'><pre>JSONSieve.prototype.close = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">cb</span>) </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.lineBuffer_) {
+    <span class="hljs-keyword">this</span>.processLine_(<span class="hljs-keyword">this</span>.lineBuffer_);
+    <span class="hljs-keyword">delete</span> <span class="hljs-keyword">this</span>.lineBuffer_;
+  }
+  <span class="hljs-keyword">return</span> (cb &amp;&amp; cb());
+};
+
+
+util.inherits(JSONSieve, events.EventEmitter);
+
+
+<span class="hljs-built_in">module</span>.exports = JSONSieve;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>
