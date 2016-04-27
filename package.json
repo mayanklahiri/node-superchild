@@ -8,6 +8,10 @@
     "docs": "node_modules/.bin/docco -l linear lib/superchild.js lib/json-sieve.js lib/unlogger.js && cat lib/superchild.js | egrep '^//' | sed  -E 's/^[ ]*\\/\\/[ ]{0,1}//' > README.md",
     "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha $(find test -name \"*.mocha.js\") && rm -rf docs/coverage && mv coverage/lcov-report docs/coverage && rm -rf coverage"
   },
+  "repository": {
+    "type" : "git",
+    "url" : "git@github.com:mayanklahiri/node-superchild.git"
+  },
   "keywords": [
     "child_process",
     "spawn",
