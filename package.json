@@ -1,0 +1,36 @@
+{
+  "name": "superchild",
+  "version": "0.1.0",
+  "description": "A smarter replacement for node.js's child_process module.",
+  "main": "lib/superchild.js",
+  "scripts": {
+    "test": "node_modules/.bin/mocha test/superchild.mocha.js",
+    "docs": "node_modules/.bin/docco -l linear lib/superchild.js lib/json-sieve.js lib/unlogger.js && cat lib/superchild.js | egrep '^//' | sed  -E 's/^[ ]*\\/\\/[ ]{0,1}//' > README.md",
+    "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha $(find test -name \"*.mocha.js\") && rm -rf docs/coverage && mv coverage/lcov-report docs/coverage && rm -rf coverage"
+  },
+  "keywords": [
+    "child_process",
+    "spawn",
+    "wrapper",
+    "supervisor",
+    "process"
+  ],
+  "author": "Mayank Lahiri <mayank@iceroad.io>",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "cpu-clock-ticks": "^1.0.2",
+    "docco": "^0.7.0",
+    "istanbul": "^0.4.3",
+    "lodash": "^4.11.1",
+    "mocha": "^2.4.5"
+  },
+  "jshintConfig": {
+    "laxcomma": true,
+    "laxbreak": true,
+    "node": true,
+    "loopfunc": false,
+    "funcscope": true,
+    "sub": true
+  }
+}
