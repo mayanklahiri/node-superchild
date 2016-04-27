@@ -1,3 +1,9 @@
+
+
+[![GitHub issues](https://img.shields.io/github/issues/mayanklahiri/node-superchild.svg)](https://github.com/mayanklahiri/node-superchild/issues)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/mayanklahiri/node-superchild/master/LICENSE)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/mayanklahiri/node-superchild.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=%5Bobject%20Object%5D)
+
 # Superchild
 
 **Superchild** is a POSIX-only (e.g., Linux, Mac OS X) wrapper around
