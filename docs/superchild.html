@@ -297,6 +297,7 @@ terminate all its descendant processes (if we need to) by running
 
         
           <div class='highlight'><pre>  <span class="hljs-keyword">var</span> child;
+  <span class="hljs-keyword">var</span> hasExited = <span class="hljs-literal">false</span>, stdoutEnded = <span class="hljs-literal">false</span>, stderrEnded = <span class="hljs-literal">false</span>;
   <span class="hljs-keyword">try</span> {
     child = spawn(commandLine, {
       detached: <span class="hljs-literal">true</span>,
@@ -325,6 +326,7 @@ JSON objects and arrays from its <code>stdout</code> stream using <code>JSONSiev
 
         
           <div class='highlight'><pre>  <span class="hljs-keyword">var</span> sieve = <span class="hljs-keyword">new</span> JSONSieve();
+  <span class="hljs-keyword">var</span> sieveClosed = <span class="hljs-literal">false</span>;
   child.stdout.on(<span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">dataStr</span>) </span>{
     sieve.observe(dataStr);
   });
@@ -376,7 +378,7 @@ node’s underlying child_process implementation.</p>
     <span class="hljs-keyword">var</span> killGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -%d'</span>, child.pid);
     spawnSync(termGroupCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
     setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
+      <span class="hljs-keyword">if</span> (!sieveClosed) {
         spawnSync(killGroupCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
       }
     }, opt.cleanupTimeoutMs);
@@ -409,15 +411,23 @@ close as well, and then flush the JSON sieve before emitting
 the ‘exit’ event through the proxy emitter.</p>
 
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> hasExited = <span class="hljs-literal">false</span>, stdoutEnded = <span class="hljs-literal">false</span>, stderrEnded = <span class="hljs-literal">false</span>;
-  <span class="hljs-keyword">var</span> exitCode, exitSignal;
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> exitCode, exitSignal;
   <span class="hljs-keyword">var</span> cleanupFn = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">if</span> (hasExited &amp;&amp; stdoutEnded &amp;&amp; stderrEnded) {
+    <span class="hljs-keyword">if</span> (hasExited &amp;&amp; stdoutEnded &amp;&amp; stderrEnded &amp;&amp; !sieveClosed) {
       sieve.close(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
         emitter.emit(<span class="hljs-string">'exit'</span>, exitCode, exitSignal);
       });
+      sieveClosed = <span class="hljs-literal">true</span>;
     }
   };
+  child.stdout.once(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    stdoutEnded = <span class="hljs-literal">true</span>;
+    cleanupFn();
+  });
+  child.stderr.once(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    stderrEnded = <span class="hljs-literal">true</span>;
+    cleanupFn();
+  });
   child.stdout.once(<span class="hljs-string">'end'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
     stdoutEnded = <span class="hljs-literal">true</span>;
     cleanupFn();

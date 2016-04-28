@@ -16,8 +16,10 @@
     "child_process",
     "spawn",
     "wrapper",
-    "supervisor",
-    "process"
+    "process",
+    "fork",
+    "exec",
+    "execFile"
   ],
   "author": "Mayank Lahiri <mayank@iceroad.io>",
   "license": "MIT",

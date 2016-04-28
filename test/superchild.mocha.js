@@ -97,7 +97,7 @@ describe('Superchild', function() {
           assert.strictEqual(pGroup.length, 0, 'should kill all children in process tree');
           cb();
         });
-      }, 1000);
+      }, 500);
     });
   });
 
