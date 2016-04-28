@@ -1,14 +1,21 @@
 
 [![Circle CI](https://circleci.com/gh/mayanklahiri/node-superchild.svg?style=svg)](https://circleci.com/gh/mayanklahiri/node-superchild)
 [![GitHub issues](https://img.shields.io/github/issues/mayanklahiri/node-superchild.svg)](https://github.com/mayanklahiri/node-superchild/issues)
+[![GitHub stars](https://img.shields.io/github/stars/mayanklahiri/node-superchild.svg)](https://github.com/mayanklahiri/node-superchild/stargazers)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/mayanklahiri/node-superchild/master/LICENSE)
+[![npm version](https://badge.fury.io/js/superchild.svg)](https://badge.fury.io/js/superchild)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/mayanklahiri/node-superchild.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=%5Bobject%20Object%5D)
-
-# Superchild
 
 **Superchild** is a POSIX-only (e.g., Linux, Mac OS X) wrapper around
 node.js's built-in `child_process` module, which requires a lot of
 care and attention to use correctly.
+
+Links:
+
+  * [Annotated source code](http://mayanklahiri.github.io/node-superchild/superchild.html)
+  * [Current test coverage](http://mayanklahiri.github.io/node-superchild/coverage/lib/index.html)
+  * [Github page](https://github.com/mayanklahiri/node-superchild)
+  * [NPM page](https://www.npmjs.com/package/superchild)
 
 The purpose of Superchild is to allow large node.js programs
 to be split into independent processes (and sub-processes, resulting
@@ -45,11 +52,10 @@ platforms, i.e., not Windows):
      child's process group, and will not be killed.
 
   4. Handle __graceful termination__ of child's entire process group
-     using `SIGINT` -> `SIGTERM` -> `SIGKILL` signals with a
-     configurable timeout between each stage.
+     using `SIGTERM` -> `SIGKILL` signals with a configurable timeout.
 
-  5. Handle __unexpected termination__ of current process by killing
-     the child's entire process group.
+  5. Handle __unexpected termination__ of the *current* process by
+     killing the child's entire process group immediately with `SIGKILL`.
 
   6. Automatically serialize and deserialize __line-delimited JSON__
      values (LD-JSON) sent to and received from child, intermixed
@@ -70,7 +76,7 @@ platforms, i.e., not Windows):
 Get a directory listing line-by-line using `ls`.
 
       var superchild = require('superchild');
-      var child = superchild('find . | wc -l');
+      var child = superchild('ls -lh');
       child.on('stdout_line', function(line) {
         console.log('[stdout]: ', line);
       });
@@ -126,8 +132,4 @@ using `child.on()` and `child.once()` functions.
 
   * `node.js` version 0.11.13 or higher, due to the use of `spawnSync`.
   * POSIX-compliant platform, such as Linux or Mac OS.
-
-
-See current test coverage report at [coverage/lib/index.html](http://mayanklahiri.github.io/node-superchild/coverage/lib/index.html),
-generated using [Istanbul](https://github.com/gotwarlost/istanbul).
 

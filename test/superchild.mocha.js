@@ -1,5 +1,7 @@
-var assert = require('chai').assert
+var _ = require('lodash')
+  ,   assert = require('chai').assert
   , fmt = require('util').format
+  , path = require('path')
   , pstatus = require('./pstatus')
   , superchild = require('../lib/superchild')
   ;
@@ -70,6 +72,33 @@ describe('Superchild', function() {
       });
     });
 
+  });
+
+  describe('basic abuse cases', function() {
+    this.slow(3000);
+
+    // Allow child to spawn 4 children: two shells and two node.js
+    // processes running busywork and infinite loops.
+    it('should kill nested infinite loops on close()', function(cb) {
+      var child = superchild('node infinite-loop-root.js', {cwd: path.join(__dirname, 'programs')});
+      assert.isOk(child.pid, 'should spawn a child');
+      this.timeout = 4000;
+      setTimeout(function() {
+        var pGroup = pstatus(child.pid);
+        assert.equal(pGroup.length, 4, 'should spawn 4 processes');
+        _.forEach(pGroup, function(proc) {
+          assert.isAtLeast(proc.rss, 1, 'should have positive RSS');
+          assert.isAtLeast(proc.sz, 1, 'should have positive sz');
+          assert.equal(proc.pgid, child.pid, 'should have pgid == child.pid');
+        });
+        child.close(function(err) {
+          assert.isNotOk(err, 'should close without error');
+          var pGroup = pstatus(child.pid);
+          assert.strictEqual(pGroup.length, 0, 'should kill all children in process tree');
+          cb();
+        });
+      }, 1000);
+    });
   });
 
 });

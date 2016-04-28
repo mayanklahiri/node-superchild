@@ -23,7 +23,6 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.5.0",
-    "cpu-clock-ticks": "^1.0.2",
     "docco": "^0.7.0",
     "istanbul": "^0.4.3",
     "lodash": "^4.11.1",

@@ -51,12 +51,20 @@
         
         <p><a href="https://circleci.com/gh/mayanklahiri/node-superchild"><img src="https://circleci.com/gh/mayanklahiri/node-superchild.svg?style=svg" alt="Circle CI"></a>
 <a href="https://github.com/mayanklahiri/node-superchild/issues"><img src="https://img.shields.io/github/issues/mayanklahiri/node-superchild.svg" alt="GitHub issues"></a>
+<a href="https://github.com/mayanklahiri/node-superchild/stargazers"><img src="https://img.shields.io/github/stars/mayanklahiri/node-superchild.svg" alt="GitHub stars"></a>
 <a href="https://raw.githubusercontent.com/mayanklahiri/node-superchild/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license"></a>
+<a href="https://badge.fury.io/js/superchild"><img src="https://badge.fury.io/js/superchild.svg" alt="npm version"></a>
 <a href="https://twitter.com/intent/tweet?text=Wow:&amp;url=%5Bobject%20Object%5D"><img src="https://img.shields.io/twitter/url/https/github.com/mayanklahiri/node-superchild.svg?style=social" alt="Twitter"></a></p>
-<h1 id="superchild">Superchild</h1>
 <p><strong>Superchild</strong> is a POSIX-only (e.g., Linux, Mac OS X) wrapper around
 node.js’s built-in <code>child_process</code> module, which requires a lot of
 care and attention to use correctly.</p>
+<p>Links:</p>
+<ul>
+<li><a href="http://mayanklahiri.github.io/node-superchild/superchild.html">Annotated source code</a></li>
+<li><a href="http://mayanklahiri.github.io/node-superchild/coverage/lib/index.html">Current test coverage</a></li>
+<li><a href="https://github.com/mayanklahiri/node-superchild">Github page</a></li>
+<li><a href="https://www.npmjs.com/package/superchild">NPM page</a></li>
+</ul>
 <p>The purpose of Superchild is to allow large node.js programs
 to be split into independent processes (and sub-processes, resulting
 in <strong>process trees</strong>), while handling the tedious parts of process
@@ -90,11 +98,10 @@ into a new process group, they will not be part of our
 child’s process group, and will not be killed.</p>
 </li>
 <li><p>Handle <strong>graceful termination</strong> of child’s entire process group
-using <code>SIGINT</code> -&gt; <code>SIGTERM</code> -&gt; <code>SIGKILL</code> signals with a
-configurable timeout between each stage.</p>
+using <code>SIGTERM</code> -&gt; <code>SIGKILL</code> signals with a configurable timeout.</p>
 </li>
-<li><p>Handle <strong>unexpected termination</strong> of current process by killing
-the child’s entire process group.</p>
+<li><p>Handle <strong>unexpected termination</strong> of the <em>current</em> process by
+killing the child’s entire process group immediately with <code>SIGKILL</code>.</p>
 </li>
 <li><p>Automatically serialize and deserialize <strong>line-delimited JSON</strong>
 values (LD-JSON) sent to and received from child, intermixed
@@ -111,7 +118,7 @@ Superchildren have 5 streams!</p>
 <h5 id="run-a-shell-command">Run a shell command</h5>
 <p>Get a directory listing line-by-line using <code>ls</code>.</p>
 <pre><code>  <span class="hljs-keyword">var</span> superchild = <span class="hljs-built_in">require</span>(<span class="hljs-string">'superchild'</span>);
-  <span class="hljs-keyword">var</span> child = superchild(<span class="hljs-string">'find . | wc -l'</span>);
+  <span class="hljs-keyword">var</span> child = superchild(<span class="hljs-string">'ls -lh'</span>);
   child.on(<span class="hljs-string">'stdout_line'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">line</span>) </span>{
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'[stdout]: '</span>, line);
   });
@@ -262,6 +269,16 @@ to <strong>true</strong>.</li>
         
       
         
+        <ul>
+<li><strong><code>cwd</code></strong>: working directory to execute child process in, defaults
+to <strong>process.cwd()</strong>.</li>
+</ul>
+
+        
+          <div class='highlight'><pre>  setDefault(<span class="hljs-string">'cwd'</span>, process.cwd());</pre></div>
+        
+      
+        
         <p>Construct an <code>EventEmitter</code> instance to return to the caller. This
 is a proxy emitter for the child process so that we can
 re-order events received from the child process if necessary.</p>
@@ -283,6 +300,7 @@ terminate all its descendant processes (if we need to) by running
     child = spawn(commandLine, {
       detached: <span class="hljs-literal">true</span>,
       shell: opt.shell,
+      cwd: opt.cwd,
       stdio: <span class="hljs-string">'pipe'</span>,
     });
     child.stdin.setDefaultEncoding(opt.stringEncoding);
@@ -335,31 +353,33 @@ JSON objects and arrays from its <code>stdout</code> stream using <code>JSONSiev
 <p>Kill the child’s process group gracefully. This involves the following
 steps:</p>
 <ol>
-<li>Send a <code>SIGINT</code> signal to the child process only.</li>
+<li>Send a <code>SIGTERM</code> signal to the child process group, allowing all
+processes in the group to die gracefully.</li>
 <li>Wait for <code>opt.cleanupTimeoutMs</code> milliseconds.</li>
-<li>Send a <code>SIGTERM</code> signal to the child’s entire process group.</li>
+<li>If the child process has not exited, send a <code>SIGKILL</code> to the
+process group.</li>
 </ol>
 <p>This method is a public method that is offered
 via the return value of the <code>superchild()</code> call.</p>
 <p>Note that we wait for the proxy emitter’s <code>exit</code> event before invoking
-the callback rather than the underlying child process’s <code>exit</code> event.
+the callback rather than the underlying node.js child process’s <code>exit</code> event.
 This is in order to wait for all output streams to flush before
-actually emitting the <code>exit</code> event.</p>
+actually emitting the <code>exit</code> event, which is not guaranteed with
+node’s underlying child_process implementation.</p>
 
         
           <div class='highlight'><pre>  emitter.close = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">cb</span>) </span>{
     cb = cb || <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{};
-    <span class="hljs-keyword">if</span> (!child.pid) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'superchild: child is not running.'</span>);
-    <span class="hljs-keyword">var</span> killChildCmdLine = fmt(<span class="hljs-string">'/bin/kill -SIGHUP -- %d'</span>, child.pid);
-    <span class="hljs-keyword">var</span> killGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -SIGTERM -- -%d'</span>, child.pid);
-    spawnSync(killChildCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
+    <span class="hljs-keyword">if</span> (!child || !child.pid) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'superchild: child is not running.'</span>);
+    <span class="hljs-keyword">var</span> termGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -%d'</span>, child.pid);
+    <span class="hljs-keyword">var</span> killGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -%d'</span>, child.pid);
+    spawnSync(termGroupCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
     setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">if</span> (child.pid) {
+      <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
         spawnSync(killGroupCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
       }
     }, opt.cleanupTimeoutMs);
     emitter.once(<span class="hljs-string">'exit'</span>, cb);
-    child.stdin.close();
   };</pre></div>
         
       
@@ -374,9 +394,9 @@ of its own process group.</p>
         
           <div class='highlight'><pre>  <span class="hljs-keyword">if</span> (opt.killOnExit) {
     process.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">if</span> (child.pid) {
-        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'kill -SIGTERM -- -%d'</span>, child.pid);
-        spawnSync(killCmdLine, {shell: <span class="hljs-literal">true</span>});
+      <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
+        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -%d'</span>, child.pid);
+        spawnSync(killCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
       }
     });
   }</pre></div>
@@ -406,9 +426,9 @@ the ‘exit’ event through the proxy emitter.</p>
     cleanupFn();
   });
   child.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">code, signal</span>) </span>{
+    hasExited = <span class="hljs-literal">true</span>;
     exitCode = code;
     exitSignal = signal;
-    hasExited = <span class="hljs-literal">true</span>;
     <span class="hljs-keyword">delete</span> child.pid;
     cleanupFn();
   });</pre></div>
@@ -423,12 +443,6 @@ additional methods that are used to control the child process:
         
           <div class='highlight'><pre>  <span class="hljs-keyword">return</span> emitter;
 };</pre></div>
-        
-      
-        
-        <p>See current test coverage report at <a href="http://mayanklahiri.github.io/node-superchild/coverage/lib/index.html">coverage/lib/index.html</a>,
-generated using <a href="https://github.com/gotwarlost/istanbul">Istanbul</a>.</p>
-
         
       
       <div class="fleur">h</div>
