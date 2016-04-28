@@ -36,5 +36,9 @@
     "loopfunc": false,
     "funcscope": true,
     "sub": true
-  }
+  },
+  "engines": {
+    "node": ">=0.11.13"
+  },
+  "os": ["!win32"]
 }

@@ -57,6 +57,19 @@ describe('Superchild', function() {
       });
     });
 
+    it('should process the last unterminated line on child exit', function(cb) {
+      var child = superchild('echo -n "sentinel"');
+      var firstLine;
+      child.once('stdout_line', function(lineStr) {
+        firstLine = lineStr;
+      });
+      child.once('exit', function() {
+        assert.isOk(firstLine, 'should process the last unterminated line');
+        assert.equal(firstLine, 'sentinel', 'should echo the correct string');
+        cb();
+      });
+    });
+
   });
 
 });
