@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">87.32% </span>
+        <span class="strong">89.87% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>62/71</span>
+        <span class='fraction'>71/79</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">69.7% </span>
+        <span class="strong">71.88% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>23/33</span>
+        <span class='fraction'>23/32</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">92.31% </span>
+        <span class="strong">93.33% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>12/13</span>
+        <span class='fraction'>14/15</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">89.86% </span>
+        <span class="strong">92.21% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>62/69</span>
+        <span class='fraction'>71/77</span>
       </div>
     </div>
   </div>
@@ -366,7 +366,17 @@
 321
 322
 323
-324</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -558,6 +568,7 @@
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -580,6 +591,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">4×</span>
@@ -628,8 +640,8 @@
 <span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3×</span>
@@ -658,12 +670,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
-<span class="cline-any cline-yes">5×</span>
-<span class="cline-any cline-yes">15×</span>
+<span class="cline-any cline-yes">25×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
@@ -879,6 +899,7 @@ module.exports = function superchild(commandLine, options) {
   // `kill -$PGID` (negation of the child's process group id).
   //
   var child;
+  var hasExited = false, stdoutEnded = false, stderrEnded = false;
   try {
     child = spawn(commandLine, {
       detached: true,
@@ -904,6 +925,7 @@ module.exports = function superchild(commandLine, options) {
   // Read from the child process by parsing out complete lines and line-delimited
   // JSON objects and arrays from its `stdout` stream using `JSONSieve`.
   var sieve = new JSONSieve();
+  var sieveClosed = false;
   child.stdout.on('data', function(dataStr) {
     sieve.observe(dataStr);
   });
@@ -951,8 +973,8 @@ module.exports = function superchild(commandLine, options) {
     var killGroupCmdLine = fmt('/bin/kill -s SIGKILL -%d', child.pid);
     spawnSync(termGroupCmdLine, {shell: true, stdio: 'inherit'});
     setTimeout(function() {
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (child &amp;&amp; child.pid) {
-<span class="cstat-no" title="statement not covered" >        spawnSync(killGroupCmdLine, {shell: true, stdio: 'inherit'});</span>
+      if (!sieveClosed) {
+        spawnSync(killGroupCmdLine, {shell: true, stdio: 'inherit'});
       }
     }, opt.cleanupTimeoutMs);
     emitter.once('exit', cb);
@@ -979,15 +1001,23 @@ module.exports = function superchild(commandLine, options) {
   // If the child exits, then we need to wait for its streams to
   // close as well, and then flush the JSON sieve before emitting
   // the 'exit' event through the proxy emitter.
-  var hasExited = false, stdoutEnded = false, stderrEnded = false;
   var exitCode, exitSignal;
   var cleanupFn = function() {
-    if (hasExited &amp;&amp; stdoutEnded &amp;&amp; stderrEnded) {
+    if (hasExited &amp;&amp; stdoutEnded &amp;&amp; stderrEnded &amp;&amp; !sieveClosed) {
       sieve.close(function() {
         emitter.emit('exit', exitCode, exitSignal);
       });
+      sieveClosed = true;
     }
   };
+  child.stdout.once('close', function() {
+    stdoutEnded = true;
+    cleanupFn();
+  });
+  child.stderr.once('close', function() {
+    stderrEnded = true;
+    cleanupFn();
+  });
   child.stdout.once('end', function() {
     stdoutEnded = true;
     cleanupFn();
@@ -1018,7 +1048,7 @@ module.exports = function superchild(commandLine, options) {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 28 2016 10:01:00 GMT-0700 (PDT)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 28 2016 10:44:18 GMT-0700 (PDT)
 </div>
 </div>
 <script src="../prettify.js"></script>
