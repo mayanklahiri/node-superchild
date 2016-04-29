@@ -376,7 +376,13 @@
 331
 332
 333
-334</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+334
+335
+336
+337</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -734,13 +740,13 @@
 // in **process trees**), while handling the tedious parts of process
 // management and communication.
 //
-// Superchild also aims to be **compatible** with any program
+// Superchild aims to be **compatible** with any program
 // that reads from and writes to their `stdin`, `stdout`, and `stderr`
 // streams, regardless of what language the program is written in.
 // This allows interesting hacks like using `ssh` to execute a
-// module, on a remote host, written in another language, and over an
-// encrypted link, while using the near-universal format of line-delimited
-// JSON messages over `stdio` for inter-process communication.
+// module on a remote host, written in another language, over an
+// encrypted link, while using the near-universal format of
+// line-delimited JSON messages over `stdio`.
 //
 // **Features** that make Superchild different from node's built-in
 // `child_process` module include the following (many of these
@@ -751,9 +757,9 @@
 //      and `spawn()` from the built-in `child_process` module.
 //
 //   2. Waits for `stdout` and `stderr` streams to end before
-//      emitting an `exit` event, unlike `child_process`.
+//      emitting an `exit` event, unlike `child_process.ChildProcess`.
 //
-//   3. Handle isolating child process and its children in a
+//   3. Handles isolating child process and its children in a
 //      separate, __detached process group__ that can be terminated
 //      as a subtree using the POSIX `kill` command. This means
 //      that calling `close()` on a Superchild instance will kill
@@ -763,25 +769,27 @@
 //      into a new process group, they will not be part of our
 //      child's process group, and will not be killed.
 //
-//   4. Handle __graceful termination__ of child's entire process group
+//   4. Handles __graceful termination__ of child's entire process group
 //      using `SIGTERM` -&gt; `SIGKILL` signals with a configurable timeout.
 //
-//   5. Handle __unexpected termination__ of the *current* process by
+//   5. Handles __unexpected termination__ of the *current* process by
 //      killing the child's entire process group immediately with `SIGKILL`.
 //
-//   6. Automatically serialize and deserialize __line-delimited JSON__
+//   6. Automatically serializes and deserializes __line-delimited JSON__
 //      values (LD-JSON) sent to and received from child, intermixed
-//      with `stdout` and `stderr`. Demultiplex child's `stdout`
-//      stream into `stdout_line` (parsed raw text lines), `json_object`
-//      (parsed LD-JSON objects), and `json_array` (parsed LD-JSON
-//      arrays) event streams. Regular processes have 3 I/O streams,
-//      Superchildren have 5 streams!
+//      with `stdout`. `stderr` is passed through unbuffered. Effectively,
+//      this means that the child's `stdout` stream is demultiplexed
+//      into the child streams `stdout_line` (parsed raw text lines),
+//      `json_object` (parsed JSON objects), and `json_array` (parsed JSON
+//      arrays). Regular processes have 3 I/O streams (stdin, stdout,
+//      stderr); Superchildren have 6 streams (stdin, stdout, stderr,
+//      stdout_line, json_object, json_array).
 //
-// ### Install
+// ## Install
 //
 //       npm install superchild
 //
-// ### Usage
+// ## Usage
 //
 // ##### Run a shell command
 //
@@ -820,7 +828,7 @@
 //      });
 //
 //
-// ### Events emitted
+// ## Events emitted
 //
 // Superchild is an EventEmitter. The following events can be listened for
 // using `child.on()` and `child.once()` functions.
@@ -833,18 +841,19 @@
 // | `json_object`  | `jsonObj`                | Parsed a line-delimited JSON object from child's `stdout` stream. |
 // | `json_array`   | `jsonArr`                | Parsed a line-delimited JSON array from child's `stdout` stream.  |
 //
-// ### Methods
+// ## Methods
 //
 // | Method          | Description                                                                    |
 // | ----------------| -------------------------------------------------------------------------------|
 // | `send(jsonVal)` | Serialize and send a JSON-serializable object or array to the child as LD-JSON.|
 // | `close(cb)`     | Gracefully terminate the child, invoking the callback when the child has died. |
 //
-// ### Requirements
+// ## Requirements
 //
 //   * `node.js` version 0.11.13 or higher, due to the use of `spawnSync`.
 //   * POSIX-compliant platform, such as Linux or Mac OS.
 //
+  // ## Source Code
 /** @license The MIT License, Copyright (c) 2016 Mayank Lahiri &lt;mayank@iceroad.io&gt; */
 var events = require('events')
   , fmt = require('util').format
@@ -1048,7 +1057,7 @@ module.exports = function superchild(commandLine, options) {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 28 2016 10:44:18 GMT-0700 (PDT)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Apr 28 2016 17:33:09 GMT-0700 (PDT)
 </div>
 </div>
 <script src="../prettify.js"></script>
