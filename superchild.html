@@ -403,7 +403,7 @@ of its own process group.</p>
           <div class='highlight'><pre>  <span class="hljs-keyword">if</span> (opt.killOnExit) {
     process.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
-        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -%d'</span>, child.pid);
+        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -%d'</span>, child.pid);
         spawnSync(killCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
       }
     });
@@ -421,6 +421,7 @@ the ‘exit’ event through the proxy emitter.</p>
     <span class="hljs-keyword">if</span> (hasExited &amp;&amp; stdoutEnded &amp;&amp; stderrEnded &amp;&amp; !sieveClosed) {
       sieve.close(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
         emitter.emit(<span class="hljs-string">'exit'</span>, exitCode, exitSignal);
+        emitter.removeAllListeners();
       });
       sieveClosed = <span class="hljs-literal">true</span>;
     }
