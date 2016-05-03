@@ -138,3 +138,10 @@ using `child.on()` and `child.once()` functions.
   * `node.js` version 0.11.13 or higher, due to the use of `spawnSync`.
   * POSIX-compliant platform, such as Linux or Mac OS.
 
+#### Helper utilities
+
+  * [`Class JSONSieve`](http://mayanklahiri.github.io/node-superchild/json-sieve.html),
+    parses a readable stream into JSON objects and arrays, and stdout lines.
+  * [`function unlogger()`](http://mayanklahiri.github.io/node-superchild/unlogger.html),
+    an example of establishing bi-directional communication between a parent
+    and child that can be easily ported to many other languages.

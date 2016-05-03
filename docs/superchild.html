@@ -223,7 +223,7 @@ using <code>child.on()</code> and <code>child.once()</code> functions.</p>
   ;
 
 
-<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">superchild</span>(<span class="hljs-params">commandLine, options</span>) </span>{
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">superchild</span>(<span class="hljs-params">commandLine, options</span>) </span>{
   <span class="hljs-keyword">if</span> (!commandLine) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Superchild: empty commandLine provided.'</span>);
   options = (<span class="hljs-keyword">typeof</span> options == <span class="hljs-string">'object'</span> ? options : {});
   <span class="hljs-keyword">var</span> opt = {}, setDefault = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">key, defaultVal</span>) </span>{
@@ -459,7 +459,24 @@ additional methods that are used to control the child process:
 
         
           <div class='highlight'><pre>  <span class="hljs-keyword">return</span> emitter;
-};</pre></div>
+}
+
+<span class="hljs-built_in">module</span>.exports = superchild;</pre></div>
+        
+      
+        
+        <h4 id="helper-utilities">Helper utilities</h4>
+<ul>
+<li><a href="http://mayanklahiri.github.io/node-superchild/json-sieve.html"><code>Class JSONSieve</code></a>,
+parses a readable stream into JSON objects and arrays, and stdout lines.</li>
+<li><a href="http://mayanklahiri.github.io/node-superchild/unlogger.html"><code>function unlogger()</code></a>,
+an example of establishing bi-directional communication between a parent
+and child that can be easily ported to many other languages.</li>
+</ul>
+
+        
+          <div class='highlight'><pre>superchild.JSONSieve = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./json-sieve'</span>);
+superchild.unlogger = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./unlogger'</span>);</pre></div>
         
       
       <div class="fleur">h</div>
