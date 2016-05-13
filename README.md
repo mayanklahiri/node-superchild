@@ -1,4 +1,3 @@
-
 [![Circle CI](https://circleci.com/gh/mayanklahiri/node-superchild.svg?style=svg)](https://circleci.com/gh/mayanklahiri/node-superchild)
 [![GitHub issues](https://img.shields.io/github/issues/mayanklahiri/node-superchild.svg)](https://github.com/mayanklahiri/node-superchild/issues)
 [![GitHub stars](https://img.shields.io/github/stars/mayanklahiri/node-superchild.svg)](https://github.com/mayanklahiri/node-superchild/stargazers)
@@ -107,9 +106,9 @@ _master.js_
 _echo.js_
 
      var unlogger = require('superchild').unlogger;
-     unlogger.start().on('json_object', function(jsonObj) {
+     unlogger().on('json_object', function(jsonObj) {
        // Echo JSON object from parent back to parent.
-       unlogger.send(jsonObj);
+       console.log(JSON.stringify(jsonObj));
      });
 
 

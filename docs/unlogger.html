@@ -53,8 +53,10 @@
         
           <div class='highlight'><pre><span class="hljs-keyword">var</span> JSONSieve = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./json-sieve'</span>);
 
+
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unlogger</span>(<span class="hljs-params">inStream</span>) </span>{
   <span class="hljs-keyword">var</span> sieve = <span class="hljs-keyword">new</span> JSONSieve();
+  inStream = inStream || process.stdin;
   inStream.setEncoding(<span class="hljs-string">'utf8'</span>);
   inStream.on(<span class="hljs-string">'data'</span>, sieve.observe.bind(sieve));
   inStream.once(<span class="hljs-string">'end'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
@@ -62,6 +64,7 @@
   });
   <span class="hljs-keyword">return</span> sieve;
 }
+
 
 <span class="hljs-built_in">module</span>.exports = unlogger;</pre></div>
         

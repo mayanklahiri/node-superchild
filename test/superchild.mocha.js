@@ -3,7 +3,6 @@ var _ = require('lodash')
   , fmt = require('util').format
   , path = require('path')
   , pstatus = require('./pstatus')
-  , spawn = require('child_process').spawn
   , superchild = require('../lib/superchild')
   ;
 
@@ -102,33 +101,4 @@ describe('Superchild', function() {
     });
   });
 
-
-  describe('unlogger', function() {
-    this.slow(200);
-
-    // Ensure that unlogger is exposed, and can be used to implement a simple
-    // two-way echo interaction.
-    it('should be compatible with child.send()', function(cb) {
-      var child = superchild('node echo.js', {cwd: path.join(__dirname, 'programs')});
-      assert.isOk(child.pid, 'should spawn a child');
-      child.send({hello: 'world'});
-      child.on('json_object', function(obj) {
-        assert.equal(obj.hello, 'world');
-        child.close(cb);
-      });
-    });
-
-
-    // Ensure that unlogger is exposed, and can be used to implement a simple
-    // two-way echo interaction.
-    it('should be able to parse "uname -a" output', function(cb) {
-      var child = spawn('uname -a', {shell: true, stdio: 'pipe'});
-      assert.isOk(child.pid, 'should spawn a child');
-      superchild.unlogger(child.stdout).once('stdout_line', function(unameOutput) {
-        assert.isAtLeast(unameOutput.length, 3);
-        cb();
-      });
-    });
-
-  });
 });
