@@ -143,9 +143,9 @@ to parse its standard input for LD-JSON arrays and objects.</p>
  });
 </code></pre><p><em>echo.js</em></p>
 <pre><code> <span class="hljs-keyword">var</span> unlogger = <span class="hljs-built_in">require</span>(<span class="hljs-string">'superchild'</span>).unlogger;
- unlogger.start().on(<span class="hljs-string">'json_object'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonObj</span>) </span>{
+ unlogger().on(<span class="hljs-string">'json_object'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonObj</span>) </span>{
    <span class="hljs-comment">// Echo JSON object from parent back to parent.</span>
-   unlogger.send(jsonObj);
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(jsonObj));
  });
 </code></pre><h2 id="events-emitted">Events emitted</h2>
 <p>Superchild is an EventEmitter. The following events can be listened for
@@ -379,8 +379,8 @@ node’s underlying child_process implementation.</p>
           <div class='highlight'><pre>  emitter.close = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">cb</span>) </span>{
     cb = cb || <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{};
     <span class="hljs-keyword">if</span> (!child || !child.pid) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'superchild: child is not running.'</span>);
-    <span class="hljs-keyword">var</span> termGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -%d'</span>, child.pid);
-    <span class="hljs-keyword">var</span> killGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -%d'</span>, child.pid);
+    <span class="hljs-keyword">var</span> termGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -- -%d'</span>, child.pid);
+    <span class="hljs-keyword">var</span> killGroupCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGKILL -- -%d'</span>, child.pid);
     spawnSync(termGroupCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
     setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">if</span> (!sieveClosed) {
@@ -403,7 +403,7 @@ of its own process group.</p>
           <div class='highlight'><pre>  <span class="hljs-keyword">if</span> (opt.killOnExit) {
     process.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
-        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -%d'</span>, child.pid);
+        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -- -%d'</span>, child.pid);
         spawnSync(killCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
       }
     });
