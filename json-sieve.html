@@ -125,7 +125,7 @@ and numbers, because they are too accidentally common in most output streams.</p
         <p>Allow some fuzz in the input in the form of leading and trailing whitespace.</p>
 
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> trimmedLine = line.replace(<span class="hljs-regexp">/^\s*|\s*$/g</span>, <span class="hljs-string">''</span>);</pre></div>
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> trimmedLine = line.replace(<span class="hljs-regexp">/^[\s\u0000-\u001f]*|[\s\u0000-\u001f]*$/g</span>, <span class="hljs-string">''</span>);</pre></div>
         
       
         
