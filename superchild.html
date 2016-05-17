@@ -338,7 +338,8 @@ JSON objects and arrays from its <code>stdout</code> stream using <code>JSONSiev
   sieve.on(<span class="hljs-string">'json_object'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'json_object'</span>));
   sieve.on(<span class="hljs-string">'json_array'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'json_array'</span>));
   sieve.on(<span class="hljs-string">'stdout_line'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'stdout_line'</span>));
-  child.stderr.on(<span class="hljs-string">'data'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'stderr_data'</span>));</pre></div>
+  child.stderr.on(<span class="hljs-string">'data'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'stderr_data'</span>));
+  child.stdout.on(<span class="hljs-string">'data'</span>, emitter.emit.bind(emitter, <span class="hljs-string">'stdout'</span>));</pre></div>
         
       
         
