@@ -105,6 +105,61 @@ describe('Superchild', function() {
       });
     });
 
+    // Child should emit exactly one message to each stream and then exit. The
+    // order of received events should match the order of events sent.
+    it('should receive stream events in the correct order', function(cb) {
+      this.slow(2000);
+      this.timeout(4000);
+      var evts = [];
+      var pushEvent = function(evtType) {
+        return function(elem) {
+          evts.push([evtType, elem]);
+        };
+      };
+      var child = superchild('node stream-test.js', {cwd: path.join(__dirname, 'programs')});
+
+      // Record events received, in order.
+      child.on('stdout_line', pushEvent('stdout_line'));
+      child.on('json_array', pushEvent('json_array'));
+      child.on('json_object', pushEvent('json_object'));
+      child.on('stderr_data', pushEvent('stderr_data'));
+      child.once('exit', function(code, signal) {
+        assert.equal(code, 91, 'should return child exit code');
+        assert.isNotOk(signal, 'should not be killed with a signal');
+        assert.deepEqual(evts, [
+          [
+            "stdout_line",
+            "This is the multi-line stdout sentinel."
+          ],
+          [
+            "stdout_line",
+            "\rIt spans three lines."
+          ],
+          [
+            "stdout_line",
+            "It has Unix and DOS line breaks."
+          ],
+          [
+            "json_array",
+            [
+              "this",
+              "is",
+              "the",
+              "json_array",
+              "sentinel"
+            ]
+          ],
+          [
+            "json_object",
+            {
+              "sentinel": "json_object"
+            }
+          ]
+        ], 'should return child events in the expected order.');
+        cb();
+      });
+    });
+
   });
 
   describe('basic abuse cases', function() {
