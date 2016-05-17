@@ -73,6 +73,22 @@ describe('Superchild', function() {
       });
     });
 
+    it('should process the last unterminated LD-JSON line on child exit', function(cb) {
+      var child = superchild('echo -n "[123, 456, 789]"');
+      var firstLine, firstArr;
+      child.once('stdout_line', function(lineStr) {
+        firstLine = lineStr;
+      });
+      child.once('json_array', function(jsonArr) {
+        firstArr = jsonArr;
+      });
+      child.once('exit', function() {
+        assert.isNotOk(firstLine, 'should not pass LD-JSON to stdout');
+        assert.deepEqual(firstArr, [123, 456, 789], 'should parse the correct array');
+        cb();
+      });
+    });
+
   });
 
   describe('basic abuse cases', function() {
