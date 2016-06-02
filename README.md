@@ -137,6 +137,11 @@ using `child.on()` and `child.once()` functions.
   * `node.js` version 0.11.13 or higher, due to the use of `spawnSync`.
   * POSIX-compliant platform, such as Linux or Mac OS.
 
+## Source Code
+
+The full annotated source code of `superchild.js` follows, generated
+automatically by Docco.
+
 #### Helper utilities
 
   * [`Class JSONSieve`](http://mayanklahiri.github.io/node-superchild/json-sieve.html),

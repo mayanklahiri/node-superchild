@@ -3,7 +3,7 @@ var _ = require('lodash')
   , fmt = require('util').format
   , path = require('path')
   , pstatus = require('./pstatus')
-  , spawn = require('child_process').spawn
+  , spawn = require('../lib/respawn').spawn
   , superchild = require('../lib/superchild')
   ;
 
@@ -14,7 +14,6 @@ describe('Superchild', function() {
 
     it('should get a long directory listing line-by-line', function(cb) {
       var child = superchild('ls -lh ' + __dirname);
-      assert.isOk(child.pid, 'should have a pid in return value');
       var lines = [];
       child.on('stdout_line', function(lineStr) {
         lines.push(lineStr);
@@ -28,7 +27,6 @@ describe('Superchild', function() {
 
     it('should filter and parse LD-JSON objects', function(cb) {
       var child = superchild('cat');
-      assert.isOk(child.pid, 'should have a pid in return value');
       var objects = [];
       child.on('json_object', function(jsonObj) {
         objects.push(jsonObj);
@@ -45,7 +43,6 @@ describe('Superchild', function() {
 
     it('should filter and parse LD-JSON arrays', function(cb) {
       var child = superchild('cat');
-      assert.isOk(child.pid, 'should have a pid in return value');
       var arrays = [];
       child.on('json_array', function(jsonArr) {
         arrays.push(jsonArr);
@@ -159,21 +156,22 @@ describe('Superchild', function() {
         cb();
       });
     });
-
   });
 
   describe('basic abuse cases', function() {
     this.slow(3000);
+    this.timeout(5000);
 
-    // Allow child to spawn 4 children: two shells and two node.js
-    // processes running busywork and infinite loops.
+    // Create a superchild + shell + grandchild node process,
+    // with child and grandchild processes running busy loops.
     it('should kill nested infinite loops on close()', function(cb) {
-      var child = superchild('node infinite-loop-root.js', {cwd: path.join(__dirname, 'programs')});
-      assert.isOk(child.pid, 'should spawn a child');
-      this.timeout = 4000;
+      var child = superchild('node infinite-loop-root.js', {
+        cwd: path.join(__dirname, 'programs')
+      });
       setTimeout(function() {
+        assert.isOk(child.pid, 'should eventually have a `child.pid`');
         var pGroup = pstatus(child.pid);
-        assert.equal(pGroup.length, 4, 'should spawn 4 processes');
+        assert.equal(pGroup.length, 3, 'should spawn 3 processes');
         _.forEach(pGroup, function(proc) {
           assert.isAtLeast(proc.rss, 1, 'should have positive RSS');
           assert.isAtLeast(proc.sz, 1, 'should have positive sz');
@@ -195,8 +193,8 @@ describe('Superchild', function() {
     // Ensure that unlogger is exposed, and can be used to implement a simple
     // two-way echo interaction.
     it('should be compatible with child.send()', function(cb) {
-      var child = superchild('node echo.js', {cwd: path.join(__dirname, 'programs')});
-      assert.isOk(child.pid, 'should spawn a child');
+      var childOpt = {cwd: path.join(__dirname, 'programs')};
+      var child = superchild('node echo.js', childOpt);
       child.send({hello: 'world'});
       child.on('json_object', function(obj) {
         assert.equal(obj.hello, 'world');
@@ -208,9 +206,21 @@ describe('Superchild', function() {
     // two-way echo interaction.
     it('should be able to parse "uname -a" output', function(cb) {
       var child = spawn('uname -a', {shell: true, stdio: 'pipe'});
-      assert.isOk(child.pid, 'should spawn a child');
       superchild.unlogger(child.stdout).once('stdout_line', function(unameOutput) {
         assert.isAtLeast(unameOutput.length, 3);
+        cb();
+      });
+    });
+  });
+
+  describe('examples', function() {
+    this.slow(500);
+
+    it('should run example-1.js', function(cb) {
+      var childOpt = {cwd: path.join(__dirname, 'programs')};
+      var child = superchild('node example-1.js', childOpt);
+      child.on('exit', function(code) {
+        assert.equal(0, code);
         cb();
       });
     });

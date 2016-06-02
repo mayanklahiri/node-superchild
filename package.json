@@ -19,7 +19,11 @@
     "process",
     "fork",
     "exec",
-    "execFile"
+    "execFile",
+    "ipc",
+    "cross-language",
+    "ld-json",
+    "json"
   ],
   "author": "Mayank Lahiri <mayank@iceroad.io>",
   "license": "MIT",

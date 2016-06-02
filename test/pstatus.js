@@ -1,7 +1,7 @@
 var _ = require('lodash')
   , fmt = require('util').format
   , fs = require('fs')
-  , spawnSync = require('child_process').spawnSync
+  , spawnSync = require('../lib/respawn').spawnSync
   ;
 
 
@@ -19,8 +19,10 @@ function GetProcessTreeStatus(pgid) {
     'sz',
     'comm',
   ];
-  var cmdLine = 'ps --no-header xao ' + psFields.join(',');
-  var psOutput = spawnSync(cmdLine, {shell: true, stdio: 'pipe'}).stdout.toString('utf-8');
+  var cmdLine = ['--no-header', 'xao', psFields.join(',')];
+  var psOutput = spawnSync('ps', cmdLine, {
+    stdio: 'pipe'
+  }).stdout.toString('utf-8');
   var table = _.map(_.filter(psOutput.split('\n')), function(lineStr) {
     return lineStr.
               replace(/\s\s*/g, ' ').       // collapse whitespace

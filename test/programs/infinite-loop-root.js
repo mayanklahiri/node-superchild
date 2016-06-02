@@ -2,7 +2,7 @@ var crypto = require('crypto')
   , spawn = require('child_process').spawn
   ;
 
-spawn('node infinite-loop-child.js', {shell: true, stdio: 'inherit'});
+spawn('node', ['infinite-loop-child.js'], {stdio: 'inherit'});
 
 var noop = function() {};
 
@@ -10,6 +10,7 @@ var noop = function() {};
 process.on('SIGTERM', noop);
 process.on('SIGHUP', noop);
 
+var i = 0;
 while (true) {
-  crypto.randomBytes(1024);
+  i += 2;
 }
