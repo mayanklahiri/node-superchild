@@ -1,6 +1,6 @@
 {
   "name": "superchild",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A smarter replacement for node.js's child_process module.",
   "main": "lib/superchild.js",
   "scripts": {
@@ -45,5 +45,11 @@
   "engines": {
     "node": ">=0.11.13"
   },
+  "contributors": [
+    {
+      "name": "Mikey",
+      "url": "https://github.com/ahdinosaur"
+    }
+  ],
   "os": ["!win32"]
 }
