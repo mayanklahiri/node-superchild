@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib/respawn.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">lib/</a> respawn.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">50% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>10/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">10% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>2/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>2/2</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">50% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>10/20</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ## respawn.js
+//
+// Backport of node 5+ behavior on spawn() and spawnSync() to
+// 0.11.13 &lt;= node_version &lt; 5.
+//
+var spawn = require('child_process').spawn
+  , spawnSync = require('child_process').spawnSync
+  ;
+&nbsp;
+&nbsp;
+// Node v4.x.x (LTS) and below:
+//
+//   1. `child_process.spawn` did not support the `shell` option, so a
+//      platform-specific shell has to be manually prefixed to the command line.
+//
+var NODE_MAJOR = parseInt(process.version.replace(/\..+/, '').substr(1), 10);
+var LEGACY_NODE = NODE_MAJOR &lt; 5;
+var IS_WINDOWS = process.platform === 'win32';
+&nbsp;
+&nbsp;
+exports.spawn = function(commandLine, spawnOpt) {
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!LEGACY_NODE) {
+    return spawn(commandLine, spawnOpt);
+  }
+&nbsp;
+  // If the `shell` option is not set, pass through to spawn.
+<span class="cstat-no" title="statement not covered" >  if (!spawnOpt || !spawnOpt.shell) {</span>
+<span class="cstat-no" title="statement not covered" >    return spawn(commandLine, spawnOpt);</span>
+  }
+&nbsp;
+  // Node 4 (LTS) and below: polyfill the `shell` option.
+<span class="cstat-no" title="statement not covered" >  var childArgs = IS_WINDOWS ?</span>
+                    ['/A', '/C', commandLine] :
+                    ['-c', commandLine];
+<span class="cstat-no" title="statement not covered" >  var shellBin = IS_WINDOWS ? 'cmd.exe' : '/bin/sh';</span>
+<span class="cstat-no" title="statement not covered" >  return spawn(shellBin, childArgs, spawnOpt);</span>
+};
+&nbsp;
+&nbsp;
+exports.spawnSync = function(commandLine, spawnOpt) {
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!LEGACY_NODE) {
+    return spawnSync(commandLine, spawnOpt);
+  }
+&nbsp;
+  // If the `shell` option is not set, pass through to spawn.
+<span class="cstat-no" title="statement not covered" >  if (!spawnOpt || !spawnOpt.shell) {</span>
+<span class="cstat-no" title="statement not covered" >    return spawnSync(commandLine, spawnOpt);</span>
+  }
+&nbsp;
+  // Node 4 (LTS) and below: polyfill the `shell` option.
+<span class="cstat-no" title="statement not covered" >  var childArgs = IS_WINDOWS ?</span>
+                    ['/A', '/C', commandLine] :
+                    ['-c', commandLine];
+<span class="cstat-no" title="statement not covered" >  var shellBin = IS_WINDOWS ? 'cmd.exe' : '/bin/sh';</span>
+<span class="cstat-no" title="statement not covered" >  return spawnSync(shellBin, childArgs, spawnOpt);</span>
+};
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Jun 02 2016 13:08:06 GMT-0700 (PDT)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

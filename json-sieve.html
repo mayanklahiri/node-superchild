@@ -70,14 +70,17 @@ is “pretty-printed” with whitespace.</p>
 <h3 id="source">Source</h3>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> events = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> EventEmitter = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
   , util = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>)
   ;
 
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">JSONSieve</span>(<span class="hljs-params"></span>) </span>{
+  EventEmitter.call(<span class="hljs-keyword">this</span>);
   <span class="hljs-keyword">this</span>.lineBuffer_ = <span class="hljs-string">''</span>;
-}</pre></div>
+}
+
+util.inherits(JSONSieve, EventEmitter);</pre></div>
         
       
         
@@ -183,7 +186,6 @@ last line of output if it does not have a terminating newline.</p>
   <span class="hljs-keyword">return</span> (cb &amp;&amp; cb());
 };
 
-util.inherits(JSONSieve, events.EventEmitter);
 
 <span class="hljs-built_in">module</span>.exports = JSONSieve;</pre></div>
         

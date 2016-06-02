@@ -211,17 +211,21 @@ using <code>child.on()</code> and <code>child.once()</code> functions.</p>
 <li>POSIX-compliant platform, such as Linux or Mac OS.</li>
 </ul>
 <h2 id="source-code">Source Code</h2>
+<p>The full annotated source code of <code>superchild.js</code> follows, generated
+automatically by Docco.</p>
 
         
           <div class='highlight'><pre><span class="hljs-comment">/** @license The MIT License, Copyright (c) 2016 Mayank Lahiri &lt;mayank@iceroad.io&gt; */</span>
 <span class="hljs-keyword">var</span> events = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>)
   , fmt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'util'</span>).format
   , fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
-  , spawn = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>).spawn
-  , spawnSync = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>).spawnSync
+  , spawn = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./respawn'</span>).spawn
+  , spawnSync = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./respawn'</span>).spawnSync
   , JSONSieve = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./json-sieve'</span>)
   ;
 
+<span class="hljs-keyword">var</span> NODE_MAJOR = <span class="hljs-built_in">parseInt</span>(process.version.replace(<span class="hljs-regexp">/\..+/</span>, <span class="hljs-string">''</span>).substr(<span class="hljs-number">1</span>), <span class="hljs-number">10</span>);
+<span class="hljs-keyword">var</span> LEGACY_NODE = NODE_MAJOR &lt; <span class="hljs-number">5</span>;
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">superchild</span>(<span class="hljs-params">commandLine, options</span>) </span>{
   <span class="hljs-keyword">if</span> (!commandLine) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Superchild: empty commandLine provided.'</span>);
@@ -304,30 +308,74 @@ terminate all its descendant processes (if we need to) by running
           <div class='highlight'><pre>  <span class="hljs-keyword">var</span> child;
   <span class="hljs-keyword">var</span> hasExited = <span class="hljs-literal">false</span>, stdoutEnded = <span class="hljs-literal">false</span>, stderrEnded = <span class="hljs-literal">false</span>;
   <span class="hljs-keyword">try</span> {
-    child = spawn(commandLine, {
+    <span class="hljs-keyword">var</span> spawnOpt = {
       detached: <span class="hljs-literal">true</span>,
       shell: opt.shell,
       cwd: opt.cwd,
       stdio: <span class="hljs-string">'pipe'</span>,
-    });
-    child.stdin.setDefaultEncoding(opt.stringEncoding);
+    };</pre></div>
+        
+      
+        
+        <p>Use <code>respawn.spawn()</code> to spawn the child process.</p>
+
+        
+          <div class='highlight'><pre>    child = spawn(commandLine, spawnOpt);
     child.stdout.setEncoding(opt.stringEncoding);
-    child.stderr.setEncoding(opt.stringEncoding);
-    <span class="hljs-keyword">if</span> (!child.pid) {
-      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'child did not have a process id.'</span>);
+    child.stderr.setEncoding(opt.stringEncoding);</pre></div>
+        
+      
+        
+        <p>Node 4 (LTS) and below: no setDefaultEncoding() function.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (child.stdin.setDefaultEncoding) {
+      child.stdin.setDefaultEncoding(opt.stringEncoding);
     }
-    emitter.pid = child.pid;
+
+    <span class="hljs-keyword">if</span> (LEGACY_NODE) {</pre></div>
+        
+      
+        
+        <p>Node 4 (LTS) and below: <code>child.pid</code> is not immediately populated, and
+<code>child_process.spawnSync</code> does not support the <code>detached</code> option. So
+the best we can do if <code>child.pid</code> is undefined is some exponential
+backoff polling that is not guaranteed to succeed.</p>
+
+        
+          <div class='highlight'><pre>      <span class="hljs-keyword">var</span> pollIntervalMs = <span class="hljs-number">1</span>;
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pollFn</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">if</span> (child.pid) {
+          emitter.pid = child.pid;
+        } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">if</span> (pollIntervalMs &lt; <span class="hljs-number">100</span>) {
+            setTimeout(pollFn, pollIntervalMs);
+            pollIntervalMs *= <span class="hljs-number">2</span>;
+          }
+        }
+      })();
+    } <span class="hljs-keyword">else</span> {</pre></div>
+        
+      
+        
+        <p>Node 5+ natively returns child.pid set.</p>
+
+        
+          <div class='highlight'><pre>      emitter.pid = child.pid;
+    }
+
   } <span class="hljs-keyword">catch</span>(e) {
     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(fmt(
-        <span class="hljs-string">'superchild: cannot spawn() child process, reason=%s'</span>,
-        e.message));
+        <span class="hljs-string">'superchild: cannot spawn() child process, reason=%s, stack=%s'</span>,
+        e.message, e.stack));
   }</pre></div>
         
       
         
         <h4 id="reading-from-the-child">Reading from the child</h4>
-<p>Read from the child process by parsing out complete lines and line-delimited
-JSON objects and arrays from its <code>stdout</code> stream using <code>JSONSieve</code>.</p>
+<p>Read from the child process by parsing out complete lines and
+line-delimited JSON objects and arrays from its <code>stdout</code> stream using
+<code>JSONSieve</code>.</p>
 
         
           <div class='highlight'><pre>  <span class="hljs-keyword">var</span> sieve = <span class="hljs-keyword">new</span> JSONSieve();
@@ -350,7 +398,7 @@ JSON objects and arrays from its <code>stdout</code> stream using <code>JSONSiev
   emitter.send = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonVal</span>) </span>{
     <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
       <span class="hljs-keyword">var</span> ser = <span class="hljs-built_in">JSON</span>.stringify(jsonVal) + <span class="hljs-string">'\n'</span>;
-      child.stdin.write(ser);
+      child.stdin.write(ser, opt.stringEncoding);
     } <span class="hljs-keyword">else</span> {
       <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Unable to write to process.'</span>);
     }
@@ -371,8 +419,8 @@ process group.</li>
 <p>This method is a public method that is offered
 via the return value of the <code>superchild()</code> call.</p>
 <p>Note that we wait for the proxy emitter’s <code>exit</code> event before invoking
-the callback rather than the underlying node.js child process’s <code>exit</code> event.
-This is in order to wait for all output streams to flush before
+the callback rather than the underlying node.js child process’s <code>exit</code>
+event. This is in order to wait for all output streams to flush before
 actually emitting the <code>exit</code> event, which is not guaranteed with
 node’s underlying child_process implementation.</p>
 
