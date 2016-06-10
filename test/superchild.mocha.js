@@ -185,10 +185,22 @@ describe('Superchild', function() {
         });
       }, 500);
     });
+
+    // Create a superchild that exits with a nonzero error code after a delay.
+    it('should handle delayed abort child programs', function(cb) {
+      var child = superchild('node delayed-abort.js', {
+        cwd: path.join(__dirname, 'programs')
+      });
+      child.on('exit', function(code, signal) {
+        assert.equal(99, code, 'should return the correct exit code');
+        cb();
+      });
+    });
+
   });
 
   describe('unlogger', function() {
-    this.slow(200);
+    this.slow(500);
 
     // Ensure that unlogger is exposed, and can be used to implement a simple
     // two-way echo interaction.
@@ -224,6 +236,7 @@ describe('Superchild', function() {
         cb();
       });
     });
+
   });
 
 });
