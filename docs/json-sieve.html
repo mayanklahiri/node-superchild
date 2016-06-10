@@ -145,10 +145,13 @@ even empty ones.</p>
 
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (trimmedLine[<span class="hljs-number">0</span>] === <span class="hljs-string">'{'</span> &amp;&amp; trimmedLine[len - <span class="hljs-number">1</span>] === <span class="hljs-string">'}'</span>) {
+      <span class="hljs-keyword">var</span> jsonObj;
       <span class="hljs-keyword">try</span> {
-        <span class="hljs-keyword">var</span> jsonObj = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_object'</span>, jsonObj);
+        jsonObj = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
       } <span class="hljs-keyword">catch</span>(e) { }  <span class="hljs-comment">// Nope, not a JSON object.</span>
+      <span class="hljs-keyword">if</span> (jsonObj &amp;&amp; <span class="hljs-keyword">typeof</span> jsonObj == <span class="hljs-string">'object'</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_object'</span>, jsonObj);
+      }
     }</pre></div>
         
       
@@ -157,10 +160,13 @@ even empty ones.</p>
 
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (trimmedLine[<span class="hljs-number">0</span>] === <span class="hljs-string">'['</span> &amp;&amp; trimmedLine[len - <span class="hljs-number">1</span>] === <span class="hljs-string">']'</span>) {
+      <span class="hljs-keyword">var</span> jsonArr;
       <span class="hljs-keyword">try</span> {
-        <span class="hljs-keyword">var</span> jsonArr = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_array'</span>, jsonArr);
+        jsonArr = <span class="hljs-built_in">JSON</span>.parse(trimmedLine);
       } <span class="hljs-keyword">catch</span>(e) { }  <span class="hljs-comment">// Nope, not a JSON array.</span>
+      <span class="hljs-keyword">if</span> (jsonArr &amp;&amp; <span class="hljs-keyword">typeof</span> jsonArr == <span class="hljs-string">'object'</span> &amp;&amp; <span class="hljs-string">'length'</span> <span class="hljs-keyword">in</span> jsonArr) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'json_array'</span>, jsonArr);
+      }
     }
   }</pre></div>
         
