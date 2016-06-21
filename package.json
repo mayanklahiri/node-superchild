@@ -1,6 +1,6 @@
 {
   "name": "superchild",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A smarter replacement for node.js's child_process module.",
   "main": "lib/superchild.js",
   "scripts": {

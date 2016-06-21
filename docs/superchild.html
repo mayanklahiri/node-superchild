@@ -289,6 +289,16 @@ to <strong>process.cwd()</strong>.</li>
         
       
         
+        <ul>
+<li><strong><code>detached</code></strong>: sets the <code>detached</code> option, which makes the process
+the leader of its own process group.</li>
+</ul>
+
+        
+          <div class='highlight'><pre>  setDefault(<span class="hljs-string">'detached'</span>, <span class="hljs-literal">true</span>);</pre></div>
+        
+      
+        
         <p>Construct an <code>EventEmitter</code> instance to return to the caller. This
 is a proxy emitter for the child process so that we can
 re-order events received from the child process if necessary.</p>
@@ -309,7 +319,7 @@ terminate all its descendant processes (if we need to) by running
   <span class="hljs-keyword">var</span> hasExited = <span class="hljs-literal">false</span>, stdoutEnded = <span class="hljs-literal">false</span>, stderrEnded = <span class="hljs-literal">false</span>;
   <span class="hljs-keyword">try</span> {
     <span class="hljs-keyword">var</span> spawnOpt = {
-      detached: <span class="hljs-literal">true</span>,
+      detached: opt.detached,
       shell: opt.shell,
       cwd: opt.cwd,
       stdio: <span class="hljs-string">'pipe'</span>,
