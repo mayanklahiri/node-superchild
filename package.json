@@ -1,6 +1,6 @@
 {
   "name": "superchild",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A smarter replacement for node.js's child_process module.",
   "main": "lib/superchild.js",
   "scripts": {
@@ -30,9 +30,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "docco": "^0.7.0",
-    "istanbul": "^0.4.3",
-    "lodash": "^4.11.1",
-    "mocha": "^2.4.5"
+    "istanbul": "^0.4.4",
+    "lodash": "^4.13.1",
+    "mocha": "^2.5.3"
   },
   "jshintConfig": {
     "laxcomma": true,
