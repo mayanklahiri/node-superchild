@@ -224,8 +224,11 @@ automatically by Docco.</p>
   , JSONSieve = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./json-sieve'</span>)
   ;
 
+
 <span class="hljs-keyword">var</span> NODE_MAJOR = <span class="hljs-built_in">parseInt</span>(process.version.replace(<span class="hljs-regexp">/\..+/</span>, <span class="hljs-string">''</span>).substr(<span class="hljs-number">1</span>), <span class="hljs-number">10</span>);
 <span class="hljs-keyword">var</span> LEGACY_NODE = NODE_MAJOR &lt; <span class="hljs-number">5</span>;
+<span class="hljs-keyword">var</span> CLEANUP_PROCESSES = {};
+
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">superchild</span>(<span class="hljs-params">commandLine, options</span>) </span>{
   <span class="hljs-keyword">if</span> (!commandLine) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Superchild: empty commandLine provided.'</span>);
@@ -355,8 +358,17 @@ backoff polling that is not guaranteed to succeed.</p>
         
           <div class='highlight'><pre>      <span class="hljs-keyword">var</span> pollIntervalMs = <span class="hljs-number">1</span>;
       (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pollFn</span>(<span class="hljs-params"></span>) </span>{
-        <span class="hljs-keyword">if</span> (child.pid) {
-          emitter.pid = child.pid;
+        <span class="hljs-keyword">if</span> (child.pid) {</pre></div>
+        
+      
+        
+        <p>Successfully have child’s pid</p>
+
+        
+          <div class='highlight'><pre>          emitter.pid = child.pid;
+          <span class="hljs-keyword">if</span> (opt.killOnExit) {
+            CLEANUP_PROCESSES[child.pid] = <span class="hljs-literal">true</span>;
+          }
         } <span class="hljs-keyword">else</span> {
           <span class="hljs-keyword">if</span> (pollIntervalMs &lt; <span class="hljs-number">100</span>) {
             setTimeout(pollFn, pollIntervalMs);
@@ -372,6 +384,9 @@ backoff polling that is not guaranteed to succeed.</p>
 
         
           <div class='highlight'><pre>      emitter.pid = child.pid;
+      <span class="hljs-keyword">if</span> (opt.killOnExit) {
+        CLEANUP_PROCESSES[child.pid] = <span class="hljs-literal">true</span>;
+      }
     }
 
   } <span class="hljs-keyword">catch</span>(e) {
@@ -404,11 +419,14 @@ line-delimited JSON objects and arrays from its <code>stdout</code> stream using
         <h4 id="writing-to-the-child-send-">Writing to the child: <code>send()</code></h4>
 
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> outbox = [];
-  emitter.send = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonVal</span>) </span>{
+          <div class='highlight'><pre>  emitter.send = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonVal, cb</span>) </span>{
     <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
-      <span class="hljs-keyword">var</span> ser = <span class="hljs-built_in">JSON</span>.stringify(jsonVal) + <span class="hljs-string">'\n'</span>;
-      child.stdin.write(ser, opt.stringEncoding);
+      <span class="hljs-keyword">var</span> serData = <span class="hljs-built_in">JSON</span>.stringify(jsonVal) + <span class="hljs-string">'\n'</span>;
+      child.stdin.write(serData, opt.stringEncoding, cb);
+      <span class="hljs-keyword">return</span> {
+        bytesWritten: serData.length,
+        prefix: serData.substr(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>),
+      };
     } <span class="hljs-keyword">else</span> {
       <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Unable to write to process.'</span>);
     }
@@ -459,15 +477,6 @@ which is the negation of its process id, since it is the leader
 of its own process group.</p>
 
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">if</span> (opt.killOnExit) {
-    process.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
-        <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -- -%d'</span>, child.pid);
-        spawnSync(killCmdLine, {shell: <span class="hljs-literal">true</span>, stdio: <span class="hljs-string">'inherit'</span>});
-      }
-    });
-  }</pre></div>
-        
       
         
         <p>If the child exits, then we need to wait for its streams to
@@ -485,27 +494,15 @@ the ‘exit’ event through the proxy emitter.</p>
       sieveClosed = <span class="hljs-literal">true</span>;
     }
   };
-  child.stdout.once(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    stdoutEnded = <span class="hljs-literal">true</span>;
-    cleanupFn();
-  });
-  child.stderr.once(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    stderrEnded = <span class="hljs-literal">true</span>;
-    cleanupFn();
-  });
-  child.stdout.once(<span class="hljs-string">'end'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    stdoutEnded = <span class="hljs-literal">true</span>;
-    cleanupFn();
-  });
-  child.stderr.once(<span class="hljs-string">'end'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    stderrEnded = <span class="hljs-literal">true</span>;
-    cleanupFn();
-  });
+  <span class="hljs-keyword">var</span> onStdoutEnd = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{ stdoutEnded = <span class="hljs-literal">true</span>; cleanupFn(); };
+  <span class="hljs-keyword">var</span> onStderrEnd = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{ stderrEnded = <span class="hljs-literal">true</span>; cleanupFn(); };
+  child.stdout.once(<span class="hljs-string">'close'</span>, onStdoutEnd);
+  child.stderr.once(<span class="hljs-string">'close'</span>, onStderrEnd);
   child.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">code, signal</span>) </span>{
     hasExited = <span class="hljs-literal">true</span>;
     exitCode = code;
     exitSignal = signal;
-    <span class="hljs-keyword">delete</span> child.pid;
+    <span class="hljs-keyword">delete</span> CLEANUP_PROCESSES[child.pid];
     cleanupFn();
   });</pre></div>
         
@@ -519,6 +516,14 @@ additional methods that are used to control the child process:
         
           <div class='highlight'><pre>  <span class="hljs-keyword">return</span> emitter;
 }
+
+process.once(<span class="hljs-string">'exit'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">Object</span>.keys(CLEANUP_PROCESSES).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">pid</span>) </span>{
+    <span class="hljs-keyword">var</span> killCmdLine = fmt(<span class="hljs-string">'/bin/kill -s SIGTERM -- -%d'</span>, pid);
+    spawnSync(killCmdLine, {stdio: <span class="hljs-string">'inherit'</span>});
+  });
+});
+
 
 <span class="hljs-built_in">module</span>.exports = superchild;</pre></div>
         
