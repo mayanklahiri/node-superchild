@@ -293,12 +293,20 @@ to <strong>process.cwd()</strong>.</li>
       
         
         <ul>
-<li><strong><code>detached</code></strong>: sets the <code>detached</code> option, which makes the process
-the leader of its own process group.</li>
+<li><strong><code>detached</code></strong>: makes the process the leader of its own process group.</li>
 </ul>
 
         
           <div class='highlight'><pre>  setDefault(<span class="hljs-string">'detached'</span>, <span class="hljs-literal">true</span>);</pre></div>
+        
+      
+        
+        <ul>
+<li><strong><code>env</code></strong>: environment variables to pass to child.</li>
+</ul>
+
+        
+          <div class='highlight'><pre>  setDefault(<span class="hljs-string">'env'</span>, <span class="hljs-literal">undefined</span>);</pre></div>
         
       
         
@@ -326,6 +334,7 @@ terminate all its descendant processes (if we need to) by running
       shell: opt.shell,
       cwd: opt.cwd,
       stdio: <span class="hljs-string">'pipe'</span>,
+      env: opt.env,
     };</pre></div>
         
       
@@ -419,16 +428,16 @@ line-delimited JSON objects and arrays from its <code>stdout</code> stream using
         <h4 id="writing-to-the-child-send-">Writing to the child: <code>send()</code></h4>
 
         
-          <div class='highlight'><pre>  emitter.send = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonVal, cb</span>) </span>{
-    <span class="hljs-keyword">if</span> (child &amp;&amp; child.pid) {
+          <div class='highlight'><pre>  emitter.send = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">jsonVal</span>) </span>{
+    <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">var</span> serData = <span class="hljs-built_in">JSON</span>.stringify(jsonVal) + <span class="hljs-string">'\n'</span>;
-      child.stdin.write(serData, opt.stringEncoding, cb);
+      child.stdin.write(serData, opt.stringEncoding);
       <span class="hljs-keyword">return</span> {
         bytesWritten: serData.length,
         prefix: serData.substr(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>),
       };
-    } <span class="hljs-keyword">else</span> {
-      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Unable to write to process.'</span>);
+    } <span class="hljs-keyword">catch</span>(e) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Unable to write to process: '</span> + e.message);
     }
   };</pre></div>
         
